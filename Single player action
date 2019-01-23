@@ -1,0 +1,215 @@
+import pygame
+from pygame.locals import *
+import numpy
+goal = 0
+
+try:
+    import sys
+    import random
+    import math
+    import os
+    import getopt
+    from socket import *
+    from pygame.locals import *
+except ImportError:
+    print ("couldn't load module. %s") % (err)
+    sys.exit(2)
+
+class Gameobject():
+    def __init__(self,image,height,speed):
+        self.speed = speed                   # attribute
+        self.power = power
+        
+        self.image = pygame.image.load('').convert()    # image
+
+        self.pos = image.get_rect().move(0,height)
+        
+    def move(self):
+        self.pos = self.pos.move(0,self.speed)
+        if self.pos.right > 600:
+            self.pos.left = 0
+
+def runmatch():
+    # Initialise screen
+    pygame.init()
+
+    pygame.mixer.pre_init(frequency=22050, size=-16, channels=2)
+    pygame.mixer.init(frequency=22050, size=-16, channels=2)
+    
+    pygame.display.set_caption('mini game')
+
+    pygame.mixer.stop()
+
+    #create a surface on screen that has the size of 1216 * 632
+    screen = pygame.display.set_mode((1216, 632))
+    
+    background = pygame.image.load('').convert()
+    player = pygame.image.load('').convert()
+    ball = pygame.image.load('').convert()    
+    leftgoal = pygame.image.load('').convert()
+    rightgoal = pygame.image.load('').convert()
+
+    # create a sound object
+    # sound1 = pygame.mixer.Sound('')
+    # channel1 = sound1.play
+    
+    #objects = []
+    #for x in range(10):
+    #    o = GameObject(player,x*40,x)
+    #    objects.append(o)
+    #while 1:
+    #    for event in pygame.event.get():
+    #        if event.type in (QUIT,KEYDOWN):
+    #            sys.exit()
+    #    for o in objects:
+    #        screen.blit(background,o.pos,o.pos)
+    #    for o in objects:
+    #        o.move()
+    #        screen.blit(o.image,o.pos)
+    #    pygame.display.update()
+    #    pygame.time.delay(1)
+
+    screen.blit(background,(0,0))     # draw the background
+    pygame.display.flip()
+
+    playerdirectX=playerdirectY=2
+    balldirectX=balldirectY=2
+
+    playerposition = player.get_rect(left=20,top=0)     # initial position
+    ballposition = ball.get_rect(left=0,top=5)
+    leftgoalposition = leftgoal.get_rect(left=0,top=250)
+    rightgoalposition = rightgoal.get_rect(left=1192,top=250)
+
+    speed = 2
+    power = 8
+    control = 75
+    
+    global goal
+    
+    while 1:
+
+        if goal == 1:
+            break
+        
+        screen.blit(ball,ballposition)
+        screen.blit(player,playerposition)      # draw the player
+        screen.blit(leftgoal,leftgoalposition)
+        screen.blit(rightgoal,rightgoalposition)
+
+        screen.blit(background,playerposition,playerposition)  # erase
+        screen.blit(background,ballposition,ballposition)
+
+        euclidballplayer = numpy.sqrt((playerposition.center[0]-ballposition.center[0])**2+(playerposition.center[1]-ballposition.center[1])**2)
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_s:
+                    if euclidballplayer > control:
+                        balldirectX = balldirectY = 0
+                    else:
+                        balldirectX = 0
+                        balldirectY = speed
+                    playerdirectX = 0
+                    playerdirectY = speed
+                if event.key == K_a:
+                    if euclidballplayer > control:
+                        balldirectX = balldirectY = 0
+                    else:
+                        balldirectX = -speed
+                        balldirectY = 0
+                    playerdirectX = -speed
+                    playerdirectY = 0
+                if event.key == K_w:
+                    if euclidballplayer > control:
+                        balldirectX = balldirectY = 0
+                    else:
+                        balldirectX = 0
+                        balldirectY = -speed
+                    playerdirectX = 0
+                    playerdirectY = -speed
+                if event.key == K_d:
+                    if euclidballplayer > control:
+                        balldirectX = balldirectY = 0
+                    else:
+                        balldirectX = speed
+                        balldirectY = 0
+                    playerdirectX = speed
+                    playerdirectY = 0
+                if event.key == K_SPACE:                       # shoot action
+                    if euclidballplayer > control:
+                        balldirectX = balldirectY = 0
+                    else:
+                        balldirectX = (leftgoalposition.center[0] - ballposition.center[0])/euclidgoalball*power  
+                        balldirectY = (leftgoalposition.center[1] - ballposition.center[1])/euclidgoalball*power
+            else:
+                balldirectX = balldirectY = 0
+                playerdirectX = playerdirectY = 0
+                
+        if ballposition[1]>600 or ballposition[1]<0 or ballposition[0]>1200 or ballposition[0]<0:
+        #    playerdirectX = -playerdirectX
+        #    playerdirectY = -playerdirectY
+            balldirectX = -balldirectX
+            balldirectY = -balldirectY
+
+        if ballposition.colliderect(leftgoalposition):
+           balldirectX = 0
+           balldirectY = 0
+           Goaltext()
+           
+        euclidgoalball = numpy.sqrt((leftgoalposition.center[0]-ballposition.center[0])**2+(leftgoalposition.center[1]-ballposition.center[1])**2)
+        
+        playerposition = playerposition.move(playerdirectX,playerdirectY)
+        ballposition = ballposition.move(balldirectX,balldirectY)
+        
+        screen.blit(player,playerposition)    # draw new player
+        screen.blit(ball,ballposition)        # draw new ball
+
+        pygame.display.flip()         # show it all
+        pygame.time.delay(10)          # stop the program for 0.1 second
+
+def Goaltext():
+    pygame.init()
+
+    pygame.mixer.pre_init(channels=2)
+    pygame.mixer.init(channels=2)
+
+    #load a Sound object
+    sound1 = pygame.mixer.Sound(r'')    #load your favourite sound
+    sound1.play()
+    
+    pygame.display.set_caption('mini game')
+
+    screen = pygame.display.set_mode((1216, 632))      # create a surface
+    
+    background = pygame.image.load('').convert()
+    
+    screen.blit(background,(0,0))     # draw the background
+    pygame.display.flip()
+    
+    font = pygame.font.Font(None, 56)    #(filename, size)
+    text = font.render("Goal!!!!!!!!!", 1, (255, 255, 0))     # create text
+    textpos = text.get_rect(top=150)
+    textpos.centerx = screen.get_rect().centerx
+
+    font1 = pygame.font.Font(None, 36)    
+    text1 = font.render("Continue        Quit", 1, (255, 255, 255))  # create text
+    textpos1 = text.get_rect(left=400,top=186)
+    
+    while 1:
+        for event in pygame.event.get():
+            if event.type in (QUIT,KEYDOWN):
+                sys.exit()
+            if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_focused():
+                if 0<pygame.mouse.get_pos()[0]<500 and 0<pygame.mouse.get_pos()[1]<500:
+                    runmatch()
+                if 600<pygame.mouse.get_pos()[0]<1000 and 0<pygame.mouse.get_pos()[1]<500:
+                    sys.exit()
+                else: continue
+            screen.blit(text1,textpos1)
+            screen.blit(text, textpos)
+            pygame.display.flip()
+            pygame.time.delay(10)
+
+Goaltext()
